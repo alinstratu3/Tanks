@@ -2,7 +2,7 @@
 
 import random
 
-from game_config import ARENA_X, ARENA_Y, GRID_HEIGHT, GRID_WIDTH, TILE_SIZE
+from .config import ARENA_X, ARENA_Y, GRID_HEIGHT, GRID_WIDTH, TILE_SIZE
 
 
 def cell_center(column: int, row: int) -> tuple[float, float]:
@@ -13,6 +13,7 @@ def cell_center(column: int, row: int) -> tuple[float, float]:
 
 
 def make_level_one_walls() -> set[tuple[int, int]]:
+	"""Build the original handcrafted maze, retained for compatibility."""
 	walls = {
 		(column, row)
 		for column in range(GRID_WIDTH)
@@ -68,6 +69,7 @@ def make_random_walls() -> set[tuple[int, int]]:
 	obstacle_count = 0
 
 	def has_connected_floor() -> bool:
+		# A connectivity check keeps every generated tile reachable from every other.
 		floor_cells = {
 			(column, row)
 			for row in range(1, GRID_HEIGHT - 1)

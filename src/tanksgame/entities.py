@@ -7,6 +7,8 @@ from dataclasses import dataclass
 
 @dataclass
 class Tank:
+	"""A player vehicle, including its controls and match score."""
+
 	name: str
 	color: tuple[int, int, int]
 	spawn: tuple[float, float]
@@ -23,12 +25,15 @@ class Tank:
 		self.respawn()
 
 	def respawn(self) -> None:
+		"""Return to the spawn point without resetting the match score."""
 		self.x, self.y = self.spawn
 		self.cooldown = 0
 
 
 @dataclass
 class Bullet:
+	"""A projectile tied to the tank that fired it."""
+
 	x: float
 	y: float
 	vx: float

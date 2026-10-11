@@ -1,8 +1,23 @@
-"""Compatibility entry point for the Tanks game."""
+"""Source-checkout launcher and compatibility exports."""
 
-from entities import Bullet, Tank
-from game import TanksGame
-from game_config import (
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+# Make the src-layout package importable when running this file directly.
+SOURCE_DIRECTORY = Path(__file__).parent / "src"
+sys.path.insert(0, str(SOURCE_DIRECTORY))
+
+from tanksgame import (  # noqa: E402
+	Bullet,
+	Tank,
+	TanksGame,
+	cell_center,
+	make_level_one_walls,
+	make_random_walls,
+)
+from tanksgame.config import (  # noqa: E402
 	ARENA_X,
 	ARENA_Y,
 	BACKGROUND,
@@ -24,7 +39,6 @@ from game_config import (
 	WALL_EDGE,
 	WINNING_SCORE,
 )
-from level import cell_center, make_level_one_walls, make_random_walls
 
 __all__ = [
 	"ARENA_X",

@@ -4,13 +4,10 @@ from __future__ import annotations
 
 import pygame
 
-from entities import Bullet, Tank
-from game_config import (
+from .config import (
 	ARENA_X,
 	ARENA_Y,
 	BACKGROUND,
-	FLOOR_A,
-	FLOOR_B,
 	FLAG_COLOR,
 	GRID_HEIGHT,
 	GRID_WIDTH,
@@ -20,12 +17,14 @@ from game_config import (
 	SCREEN_HEIGHT,
 	SCREEN_WIDTH,
 	TILE_SIZE,
-	WALL,
-	WALL_EDGE,
 )
+from .entities import Bullet, Tank
+from .theme import ArenaTheme
 
 
 class GameRenderer:
+	"""Draw the arena, status panel, tanks, and match-end screen."""
+
 	def __init__(self) -> None:
 		self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 		pygame.display.set_caption("Tanks | Labyrinth Run")
@@ -39,6 +38,7 @@ class GameRenderer:
 		right_x, right_y = -dy, dx
 
 		def point(forward: float, side: float, shadow: bool = False) -> tuple[int, int]:
+			# Convert tank-local coordinates into screen coordinates using its heading.
 			offset = 2 if shadow else 0
 			return (
 				round(x + dx * forward + right_x * side + offset),
@@ -123,7 +123,9 @@ class GameRenderer:
 		notice_timer: float,
 		game_over: bool,
 		winner_message: str,
+		theme: ArenaTheme,
 	) -> None:
+		"""Render one complete frame from the current game state."""
 		self.screen.fill(BACKGROUND)
 		pygame.draw.rect(self.screen, PANEL, (0, 0, SCREEN_WIDTH, 96))
 		title = self.title_font.render("TANKS  /  LABYRINTH RUN", True, INK)
@@ -154,19 +156,19 @@ class GameRenderer:
 					TILE_SIZE,
 				)
 				if (column, row) in walls:
-					pygame.draw.rect(self.screen, WALL, rectangle)
-					pygame.draw.rect(self.screen, WALL_EDGE, rectangle, 1)
+					pygame.draw.rect(self.screen, theme.wall, rectangle)
+					pygame.draw.rect(self.screen, theme.wall_edge, rectangle, 1)
 					pygame.draw.line(
 						self.screen,
-						(128, 146, 137),
+						theme.wall_edge,
 						rectangle.topleft,
 						(rectangle.right, rectangle.top),
 						2,
 					)
 				else:
-					floor = FLOOR_A if (column + row) % 2 else FLOOR_B
+					floor = theme.floor_a if (column + row) % 2 else theme.floor_b
 					pygame.draw.rect(self.screen, floor, rectangle)
-					pygame.draw.rect(self.screen, (45, 59, 60), rectangle, 1)
+					pygame.draw.rect(self.screen, theme.grid_line, rectangle, 1)
 
 		if not game_over:
 			flag_x, flag_y = map(round, flag)

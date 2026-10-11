@@ -8,8 +8,7 @@ import sys
 
 import pygame
 
-from entities import Bullet, Tank
-from game_config import (
+from .config import (
 	ARENA_X,
 	ARENA_Y,
 	FPS,
@@ -20,17 +19,22 @@ from game_config import (
 	TILE_SIZE,
 	WINNING_SCORE,
 )
-from level import cell_center, make_random_walls
-from renderer import GameRenderer
+from .entities import Bullet, Tank
+from .level import cell_center, make_random_walls
+from .renderer import GameRenderer
+from .theme import make_random_theme
 
 
 class TanksGame:
+	"""Own the match state and coordinate input, simulation, and rendering."""
+
 	def __init__(self) -> None:
 		pygame.init()
 		self.renderer = GameRenderer()
 		self.screen = self.renderer.screen
 		self.clock = pygame.time.Clock()
 		self.walls = make_random_walls()
+		self.theme = make_random_theme()
 		self.players = [
 			Tank(
 				"PLAYER 1",
@@ -47,6 +51,7 @@ class TanksGame:
 				pygame.K_RETURN,
 			),
 		]
+		self._apply_tank_colors()
 		self.flag = (-1, -1)
 		self.relocate_flag()
 		self.bullets: list[Bullet] = []
@@ -56,6 +61,7 @@ class TanksGame:
 		self.notice_timer = 4.0
 
 	def relocate_flag(self) -> None:
+		"""Choose an open tile away from the spawns and, when possible, both tanks."""
 		previous_flag = self.flag
 		spawn_points = {tank.spawn for tank in self.players}
 		candidates = [
@@ -83,6 +89,7 @@ class TanksGame:
 		self.flag = random.choice(candidates)
 
 	def wall_at(self, x: float, y: float, radius: int) -> bool:
+		"""Return whether a circular collision body overlaps any wall tile."""
 		left = math.floor((x - radius - ARENA_X) / TILE_SIZE)
 		right = math.floor((x + radius - ARENA_X) / TILE_SIZE)
 		top = math.floor((y - radius - ARENA_Y) / TILE_SIZE)
@@ -110,6 +117,7 @@ class TanksGame:
 		length = math.hypot(dx, dy)
 		if length == 0:
 			return
+		# Normalize diagonals so they do not move faster than cardinal input.
 		dx, dy = dx / length, dy / length
 		tank.facing = (dx, dy)
 		speed = 170 * dt
@@ -136,6 +144,7 @@ class TanksGame:
 		tank.cooldown = 0.42
 
 	def update(self, dt: float) -> None:
+		"""Advance one simulation step; dt is capped by the outer game loop."""
 		if self.game_over:
 			return
 		keys = pygame.key.get_pressed()
@@ -191,10 +200,13 @@ class TanksGame:
 				self.fire(tank)
 
 	def reset(self) -> None:
+		"""Start a fresh match and generate a new random maze."""
 		for tank in self.players:
 			tank.respawn()
 			tank.score = 0
 		self.walls = make_random_walls()
+		self.theme = make_random_theme(self.theme)
+		self._apply_tank_colors()
 		self.bullets.clear()
 		self.game_over = False
 		self.winner_message = ""
@@ -202,6 +214,11 @@ class TanksGame:
 		self.relocate_flag()
 		self.notice = "Both tanks: reach the flag. A hit sends your rival back to spawn."
 		self.notice_timer = 3.0
+
+	def _apply_tank_colors(self) -> None:
+		"""Match each tank's UI and sprite color to the active arena palette."""
+		self.players[0].color = self.theme.player_one
+		self.players[1].color = self.theme.player_two
 
 	def draw(self) -> None:
 		self.renderer.draw(
@@ -213,6 +230,7 @@ class TanksGame:
 			self.notice_timer,
 			self.game_over,
 			self.winner_message,
+			self.theme,
 		)
 
 	def run(self) -> None:
