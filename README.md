@@ -7,19 +7,6 @@ capture the flag in a randomly generated maze while firing at each other.
 
 Python 3.10 or newer is required.
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -e .
-python tanks.py
-```
-
-You can also launch the installed console command:
-
-```powershell
-labyrinth-tanks
-```
-
 ## Controls and rules
 
 | Player | Movement | Fire |
@@ -36,11 +23,6 @@ labyrinth-tanks
 
 The executable is a single windowed file, built for the current Windows
 machine. Install the optional build dependency and run the build script:
-
-```powershell
-python -m pip install -e ".[build]"
-python tools\build_exe.py
-```
 
 The result is `Tanks.exe` in the project root, beside this README. It can be
 copied and run on Windows systems without a separate Python installation.
@@ -68,10 +50,4 @@ tests/
     test_theme.py     Map and tank color contrast
 tools/
     build_exe.py      PyInstaller executable builder
-```
-
-Run the test suite with:
-
-```powershell
-python -m unittest discover -s tests
 ```
